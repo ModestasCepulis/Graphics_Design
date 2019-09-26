@@ -6,8 +6,9 @@ using UnityEditor;
 
 public class Transformations : MonoBehaviour {
 
-	// Use this for initialization
-	void Start () {
+    // Use this for initialization
+    void Start()
+    {
         Vector3[] cube = new Vector3[8];
         cube[0] = new Vector3(1, 1, 1);
         cube[1] = new Vector3(-1, 1, 1);
@@ -28,27 +29,27 @@ public class Transformations : MonoBehaviour {
             Matrix4x4.TRS(new Vector3(0, 0, 0),
                             rotation,
                             Vector3.one);
-        printMatrix(rotationMatrix);
+        //printMatrix(rotationMatrix);
 
         Vector3[] imageAfterRotation =
             MatrixTransform(cube, rotationMatrix);
-        print("Cordinates of image after rotatation");
+        //  print("Cordinates of image after rotatation");
 
-        printVerts(imageAfterRotation);
-        
+        //  printVerts(imageAfterRotation);
+
         //Scaling
 
         Matrix4x4 scaleMatrix =
     Matrix4x4.TRS(new Vector3(0, 0, 0),
                     Quaternion.identity,
                     new Vector3(14, 5, 3));
-        printMatrix(scaleMatrix);
+        // printMatrix(scaleMatrix);
 
         Vector3[] imageAfterScale =
             MatrixTransform(imageAfterRotation, scaleMatrix);
-        print("Cordinates of image after scaling");
+        // print("Cordinates of image after scaling");
 
-        printVerts(imageAfterScale);
+        //printVerts(imageAfterScale);
 
         //Translation
 
@@ -56,21 +57,18 @@ public class Transformations : MonoBehaviour {
         Matrix4x4.TRS(new Vector3(2, -2, -2),
             Quaternion.identity,
             Vector3.one);
-        print("Translation matrix:");
-        printMatrix(TranslationMatrix);
+        //print("Translation matrix:");
+        // printMatrix(TranslationMatrix);
 
         Vector3[] imageAfterTranslation =
             MatrixTransform(imageAfterScale, TranslationMatrix);
-        print("Cordinates of image after translation");
+        //print("Cordinates of image after translation");
 
-        printVerts(imageAfterTranslation);
+        //printVerts(imageAfterTranslation);
 
         //single Matric of TRS
 
-        Matrix4x4 SingleMatrixOfTransformations =
-        Matrix4x4.TRS(new Vector3(14, -3, -3),
-              rotation,
-              new Vector3(2, -2, -2));
+        Matrix4x4 SingleMatrixOfTransformations = TranslationMatrix * scaleMatrix * rotationMatrix;
         print("Single Matrix Of Transformations:");
         printMatrix(SingleMatrixOfTransformations);
 
@@ -79,6 +77,46 @@ public class Transformations : MonoBehaviour {
         print("Cordinates of image after super matrix");
 
         printVerts(imageAfterSingleMatrix);
+
+        //viewing matrix
+        Vector3 cameraPosition = new Vector3(16, 0, 47);
+        Vector3 cameraLookAt = new Vector3(-3, 14, 3);
+        Vector3 cameraUP = new Vector3(-2, -3, 14);
+
+        Vector3 LookRotationDirection = cameraLookAt - cameraPosition;
+        Quaternion cameraRotation = Quaternion.LookRotation(LookRotationDirection.normalized, cameraUP.normalized);
+
+        Matrix4x4 viewMatrix = Matrix4x4.TRS(-cameraPosition, cameraRotation, Vector3.one);
+       // print("View Matrix");
+       // printMatrix(viewMatrix);
+
+        Vector3[] ImageAfterViewing = MatrixTransform(imageAfterTranslation, viewMatrix);
+        //print("Image after view matrix:");
+        //printVerts(ImageAfterViewing);
+
+        //Projection Matrix
+        Matrix4x4 projectionMatrix = Matrix4x4.Perspective(45, 1.6f, 1, 800);
+        //print("Projectino Matrix");
+        //printMatrix(projectionMatrix);
+
+        Vector3[] ImageAfterProjectionMatrix = MatrixTransform(ImageAfterViewing, projectionMatrix);
+        //print("Image after projection matrix");
+        //printVerts(ImageAfterProjectionMatrix);
+
+        //SuperMatrixForEverything
+
+        Matrix4x4 SuperMatrix = projectionMatrix * viewMatrix * SingleMatrixOfTransformations;
+       // print("Super Matrix");
+       // printMatrix(SuperMatrix);
+
+        Vector3[] ImageAfterSuperMatrix =
+            MatrixTransform(cube, SuperMatrix);
+         //print("Cordinates of image after super matrix");
+
+       // printVerts(ImageAfterSuperMatrix);
+
+
+
 
     }
 
